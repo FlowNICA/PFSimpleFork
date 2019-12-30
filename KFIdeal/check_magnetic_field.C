@@ -1,12 +1,14 @@
 #include "../KFSimple/Constants.h"
 
-void check_magnetic_field(const TString infile="/home/vklochkov/Data/na61/pbpb/13gev/mc/analysis_tree/dcmqgsm_150.analysistree.root")
+void check_magnetic_field(const TString& infile="/home/vklochkov/Data/na61/pbpb/13gev/mc/analysis_tree/dcmqgsm_150.analysistree.root",
+                          const TString& field_file_name="/home/vklochkov/Data/na61/pbpb/13gev/mc/magnetic_field/field_y.root",
+                          const TString& field_name="field_y")
 {
-  TFile* field_file = TFile::Open("/home/vklochkov/Data/na61/pbpb/13gev/mc/magnetic_field/field_y.root");
-  auto* field_map = field_file->Get<TH3F>("field_y");
+  std::unique_ptr<TFile> field_file {TFile::Open(field_file_name)};
+  auto* field_map = field_file->Get<TH3F>(field_name);
 
-  TFile* file = TFile::Open(infile);
-  TTree* tree = file->Get<TTree>("aTree");
+  std::unique_ptr<TFile> file {TFile::Open(infile)};
+  std::unique_ptr<TTree> tree {file->Get<TTree>("aTree")};
 
   AnalysisTree::Configuration *config = file->Get<AnalysisTree::Configuration>("Configuration");
   const int i_field_coff = config->GetBranchConfig("KfpfTracks").GetFieldId("cx0");
@@ -28,11 +30,9 @@ void check_magnetic_field(const TString infile="/home/vklochkov/Data/na61/pbpb/1
       const auto& track = rec_tracks->GetChannel(i_track);
 
       const float z0 = track.GetField<float>(i_field_coff + kZ0);
-
       const float cy0 = track.GetField<float>(i_field_coff + kCy0);
       const float cy1 = track.GetField<float>(i_field_coff + kCy1);
       const float cy2 = track.GetField<float>(i_field_coff + kCy2);
-
       const float x = track.GetField<float>(i_par);
       const float y = track.GetField<float>(i_par+1);
       const float z = track.GetField<float>(i_par+2);
@@ -43,8 +43,8 @@ void check_magnetic_field(const TString infile="/home/vklochkov/Data/na61/pbpb/1
       out.Fill(x, y, (mf_map-mf_y0) / (mf_map+mf_y0) );
 //      std::cout << mf_map << " " << mf_y0 << std::endl;
     }
-
   }
+
   auto *out_file = TFile::Open("out.root", "recreate");
   out.Write();
   out_file->Close();

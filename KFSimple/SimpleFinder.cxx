@@ -153,6 +153,7 @@ KFParticleSIMD SimpleFinder::ConstructMother(const KFPTrack &track1, const int p
   const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
   
   KFParticleSIMD mother;
+  mother.SetConstructMethod(2);
   mother.Construct(vDaughtersPointer, 2, nullptr);
   
   return mother;

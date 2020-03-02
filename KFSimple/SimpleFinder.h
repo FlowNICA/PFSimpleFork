@@ -47,13 +47,27 @@ class SimpleFinder
 
  protected:
    
+  struct EPif
+  {
+    KFParticleSIMD motherEPif;
+    float E1i;                 // 1-st daughter energy before transport
+    float E2i;                 // 2-nd daughter energy before transport
+    float E1f;                 // 1-st daughter energy after  transport
+    float E2f;                 // 2-nd daughter energy after  transport
+    float PMi;                 // Mother momentum before construction
+    float PMf;                 // Mother momentum after  construction
+    float EMi;                 // Mother energy   before construction
+    float EMf;                 // Mother energy   after  construction
+  };
+   
   float CalculateChiToPrimaryVertex(const KFPTrack &track, int pid) const;  ///< Calculates \f$\chi^2\f$ of the track to the primary vertex (PV)
   void  CalculateParamsInPCA(const KFPTrack &track1, int pid1, const KFPTrack &track2, int pid2, std::array<float, 8> &pars1, std::array<float, 8> &pars2) const;
   ///< Recalculates daughters tracks' parameters in the point of their closest approach
   
   float CalculateDistanceBetweenParticles(const std::array<float, 8> &pars1, const std::array<float, 8> &pars2) const;  ///< Calculates the distance between daughter tracks in their closest approach
   float CalculateCosMomentumSum(const std::array<float, 8> &pars1, const std::array<float, 8> &pars2) const;    ///< Calculates the cosine of the angle between daughter's and mother's momenta
-  KFParticleSIMD ConstructMother(const KFPTrack &track1, int pid1, const KFPTrack &track2, int pid2) const;   ///< Creates mother particle as the KFParticleSIMD object
+//   KFParticleSIMD ConstructMother(const KFPTrack &track1, int pid1, const KFPTrack &track2, int pid2) const;   ///< Creates mother particle as the KFParticleSIMD object
+  struct EPif ConstructMother(const KFPTrack &track1, int pid1, const KFPTrack &track2, int pid2) const;   ///< Creates mother particle as the KFParticleSIMD object
   float CalculateChi2Geo(const KFParticleSIMD& mother) const;  ///< Calculates \f$\chi^2\f$ of daughters' tracks in their closest approach
   void  CalculateMotherProperties(const KFParticleSIMD& mother, float &l, float &ldl, int &isFromPV) const;
   ///< Calculates distance between primary and secondary vertices with error and determines whether mother comes from the PV

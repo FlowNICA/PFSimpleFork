@@ -125,7 +125,7 @@ float SimpleFinder::CalculateDistanceBetweenParticles(const std::array<float, 8>
 float SimpleFinder::CalculateCosMomentumSum(const std::array<float, 8> &pars1, const std::array<float, 8> &pars2) const
 {
   /**
-   * Find cosine bitween daughter1 and mother momenta
+   * Find cosine between daughter1 and mother momenta
    */
   const std::array<float, 3> P1 = {pars1.at(3), pars1.at(4), pars1.at(5)};
   const std::array<float, 3> P2 = {pars2.at(3), pars2.at(4), pars2.at(5)};
@@ -135,8 +135,10 @@ float SimpleFinder::CalculateCosMomentumSum(const std::array<float, 8> &pars1, c
          (sqrt(P1.at(0)*P1.at(0) + P1.at(1)*P1.at(1) + P1.at(2)*P1.at(2)) * sqrt(PSum.at(0)*PSum.at(0) + PSum.at(1)*PSum.at(1) + PSum.at(2)*PSum.at(2)));
 }
 
-KFParticleSIMD SimpleFinder::ConstructMother(const KFPTrack &track1, const int pid1, const KFPTrack &track2, const int pid2) const
+struct EPif SimpleFinder::ConstructMother(const KFPTrack &track1, const int pid1, const KFPTrack &track2, const int pid2) const
 {
+  EPif out;
+  
   KFParticle particle1(track1, pid1);
   KFParticle particle2(track2, pid2);
   particle1.SetId(track1.Id());
@@ -144,19 +146,55 @@ KFParticleSIMD SimpleFinder::ConstructMother(const KFPTrack &track1, const int p
   KFParticleSIMD particleSIMD1(particle1);    // the same particle is copied to each SIMD element
   KFParticleSIMD particleSIMD2(particle2);
   
+  out.E1i = particle1.E();
+  out.E2i = particle2.E();
+  
   float_v ds[2] = {0.f,0.f};
   float_v dsdr[4][6];
 
   particleSIMD1.GetDStoParticle( particleSIMD2, ds, dsdr );
   particleSIMD1.TransportToDS(ds[0], dsdr[0]);
   particleSIMD2.TransportToDS(ds[1], dsdr[3]);
+  
+  particleSIMD1.GetKFParticle(particle1, 0);
+  particleSIMD2.GetKFParticle(particle2, 0);
+  
+  out.E1f = particle1.E();
+  out.E2f = particle2.E();
+  
+  out.PMi = sqrt((particle1.GetPx() + particle2.GetPx())*(particle1.GetPx() + particle2.GetPx()) + (particle1.GetPy() + particle2.GetPy())*(particle1.GetPy() + particle2.GetPy()) + (particle1.GetPz() + particle2.GetPz())*(particle1.GetPz() + particle2.GetPz()));
+  out.EMi = particle1.E() + particle2.E();
+    
   const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
   
   KFParticleSIMD mother;
-  mother.SetConstructMethod(2);
+//   mother.SetConstructMethod(2);
   mother.Construct(vDaughtersPointer, 2, nullptr);
   
-  return mother;
+  KFParticle single_mother;
+  mother.GetKFParticle(single_mother, 0);
+  
+  out.PMf = single_mother.GetMomentum();
+  out.EMf = single_mother.E();
+  
+  out.motherEPif = mother;
+  
+//   if(single_mother.GetMass() < 1.)
+//   {
+//     std::cout << particle1.GetPx() << "\t" << particle1.GetPy() << "\t" << particle1.GetPz() << "\t" << particle1.GetMomentum() << "\t" << particle1.E() << "\n";
+//     std::cout << particle2.GetPx() << "\t" << particle2.GetPy() << "\t" << particle2.GetPz() << "\t" << particle2.GetMomentum() << "\t" << particle2.E() << "\n\n";
+//     
+//     particleSIMD1.GetKFParticle(particle1, 0);
+//     particleSIMD2.GetKFParticle(particle2, 0);
+//     
+//     std::cout << particle1.GetPx() << "\t" << particle1.GetPy() << "\t" << particle1.GetPz() << "\t" << particle1.GetMomentum() << "\t" << particle1.E() << "\n";
+//     std::cout << particle2.GetPx() << "\t" << particle2.GetPy() << "\t" << particle2.GetPz() << "\t" << particle2.GetMomentum() << "\t" << particle2.E() << "\n";
+//     std::cout << "----------------------------------------------------------------------------\n";
+//     std::cout << particle1.GetPx() + particle2.GetPx() << "\t" << particle1.GetPy() + particle2.GetPy() << "\t" << particle1.GetPz() + particle2.GetPz() << "\t" << sqrt((particle1.GetPx() + particle2.GetPx())*(particle1.GetPx() + particle2.GetPx()) + (particle1.GetPy() + particle2.GetPy())*(particle1.GetPy() + particle2.GetPy()) + (particle1.GetPz() + particle2.GetPz())*(particle1.GetPz() + particle2.GetPz())) << "\t" << particle1.E() + particle2.E() << "\n\n";
+//     std::cout << single_mother.GetPx() << "\t" << single_mother.GetPy() << "\t" << single_mother.GetPz() << "\t" << single_mother.GetMomentum() << "\t" << single_mother.E() << "\n\n\n\n";    
+//   }
+  
+  return out;
 }
 
 float SimpleFinder::CalculateChi2Geo(const KFParticleSIMD& mother) const
@@ -270,7 +308,9 @@ void SimpleFinder::FindParticles()
       if(lambda.GetCosineDaughterPos() < cuts_.GetCutCosineDaughterPos() || lambda.GetCosineDaughterNeg() < cuts_.GetCutCosineDaughterNeg()
          || lambda.GetCosineDaughterPos()!=lambda.GetCosineDaughterPos() || lambda.GetCosineDaughterNeg()!=lambda.GetCosineDaughterNeg()) continue;
             
-      KFParticleSIMD mother = ConstructMother(trackNeg, pidNeg, trackPos, pidPos);
+//       KFParticleSIMD mother = ConstructMother(trackNeg, pidNeg, trackPos, pidPos);
+      struct EPif complex_mother = ConstructMother(trackNeg, pidNeg, trackPos, pidPos);
+      KFParticleSIMD mother = complex_mother.motherEPif;
       
       lambda.SetChi2Geo(CalculateChi2Geo(mother));
       if(!finite(lambda.GetChi2Geo()) || lambda.GetChi2Geo() <= 0) continue;

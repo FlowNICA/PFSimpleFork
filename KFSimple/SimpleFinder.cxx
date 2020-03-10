@@ -137,6 +137,28 @@ float SimpleFinder::CalculateCosMomentumSum(const std::array<float, 8> &pars1, c
 
 KFParticleSIMD SimpleFinder::ConstructMother(const KFPTrack &track1, const int pid1, const KFPTrack &track2, const int pid2) const
 {
+//   KFParticle particle1(track1, pid1);
+//   KFParticle particle2(track2, pid2);
+//   particle1.SetId(track1.Id());
+//   particle2.SetId(track2.Id());
+//   KFParticleSIMD particleSIMD1(particle1);    // the same particle is copied to each SIMD element
+//   KFParticleSIMD particleSIMD2(particle2);
+//   
+//   float_v ds[2] = {0.f,0.f};
+//   float_v dsdr[4][6];
+// 
+//   particleSIMD1.GetDStoParticle( particleSIMD2, ds, dsdr );
+//   particleSIMD1.TransportToDS(ds[0], dsdr[0]);
+//   particleSIMD2.TransportToDS(ds[1], dsdr[3]);
+//   const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
+//   
+//   KFParticleSIMD mother;
+//   mother.Construct(vDaughtersPointer, 2, nullptr);
+//   
+// //   return mother;
+//   
+  //----------------------------------------------
+  
   KFParticle particle1(track1, pid1);
   KFParticle particle2(track2, pid2);
   particle1.SetId(track1.Id());
@@ -144,16 +166,15 @@ KFParticleSIMD SimpleFinder::ConstructMother(const KFPTrack &track1, const int p
   KFParticleSIMD particleSIMD1(particle1);    // the same particle is copied to each SIMD element
   KFParticleSIMD particleSIMD2(particle2);
   
-  float_v ds[2] = {0.f,0.f};
-  float_v dsdr[4][6];
-
-  particleSIMD1.GetDStoParticle( particleSIMD2, ds, dsdr );
-  particleSIMD1.TransportToDS(ds[0], dsdr[0]);
-  particleSIMD2.TransportToDS(ds[1], dsdr[3]);
-  const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
+  KFParticle mother_single;
+  mother_single.Px() = particle1.Px() + particle2.Px();
+  mother_single.Py() = particle1.Py() + particle2.Py();
+  mother_single.Pz() = particle1.Pz() + particle2.Pz();
+  mother_single.E() = particle1.E() + particle2.E();
   
-  KFParticleSIMD mother;
-  mother.Construct(vDaughtersPointer, 2, nullptr);
+  KFParticleSIMD mother(mother_single);
+  mother.AddDaughterId(particleSIMD1.Id());
+  mother.AddDaughterId(particleSIMD2.Id());
   
   return mother;
 }
@@ -272,8 +293,8 @@ void SimpleFinder::FindParticles()
       KFParticleSIMD mother = ConstructMother(trackNeg, pidNeg, trackPos, pidPos);
       
       lambda.SetChi2Geo(CalculateChi2Geo(mother));
-      if(!finite(lambda.GetChi2Geo()) || lambda.GetChi2Geo() <= 0) continue;
-      if(lambda.GetChi2Geo() >= cuts_.GetCutChi2Geo()) continue;
+//       if(!finite(lambda.GetChi2Geo()) || lambda.GetChi2Geo() <= 0) continue;
+//       if(lambda.GetChi2Geo() >= cuts_.GetCutChi2Geo()) continue;
       
       float l, ldl;
       int isfrompv = -1;
@@ -284,11 +305,11 @@ void SimpleFinder::FindParticles()
       
       lambda.SetCosineTopo(CalculateCosTopo(mother));
       
-      if(lambda.GetL() >= cuts_.GetCutLUp() || lambda.GetL()!=lambda.GetL()) continue;
-      if(lambda.GetLdL() <= cuts_.GetCutLdL() || lambda.GetLdL()!=lambda.GetLdL()) continue;
-      if(lambda.GetIsFromPV() == cuts_.GetCutIsFromPV()) continue;
+//       if(lambda.GetL() >= cuts_.GetCutLUp() || lambda.GetL()!=lambda.GetL()) continue;
+//       if(lambda.GetLdL() <= cuts_.GetCutLdL() || lambda.GetLdL()!=lambda.GetLdL()) continue;
+//       if(lambda.GetIsFromPV() == cuts_.GetCutIsFromPV()) continue;
 //       if(lambda.GetCosineTopo() <= cuts_.GetCutCosineTopo()) continue;
-      if(lambda.GetL() <= cuts_.GetCutLDown()) continue;
+//       if(lambda.GetL() <= cuts_.GetCutLDown()) continue;
       
       lambda.SetChi2Topo(CalculateChi2Topo(mother));
 //       if(lambda.GetChi2Topo() > cuts_.GetCutChi2Topo()) continue;

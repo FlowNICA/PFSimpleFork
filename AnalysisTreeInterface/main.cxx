@@ -13,11 +13,11 @@ int main(int argc, char** argv)
 
   CutsContainer cuts;
   cuts.CancelCuts();
-  cuts.SetCutChi2PrimPos(18.6);
-  cuts.SetCutChi2PrimNeg(18.6);
-  cuts.SetCutDistance(1.);
-  cuts.SetCutChi2Geo(3.);
-  cuts.SetCutLdL(5.);
+//   cuts.SetCutChi2PrimPos(18.6);
+//   cuts.SetCutChi2PrimNeg(18.6);
+//   cuts.SetCutDistance(1.);
+//   cuts.SetCutChi2Geo(3.);
+//   cuts.SetCutLdL(5.);
 
   const std::string& filename = argv[1];
 

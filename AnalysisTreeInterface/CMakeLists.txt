@@ -23,7 +23,7 @@ add_target_property(KFMan COMPILE_FLAGS "-DDO_TPCCATRACKER_EFF_PERFORMANCE -DNon
 
 add_executable(main main.cxx)
 add_dependencies(main KFMan)
-target_link_libraries(main KFMan KFParticleSimple KFParticleInterface KFParticle Vc)
+target_link_libraries(main KFMan KFParticleSimple KFParticleInterface KFParticle)
 
 install(TARGETS KFMan EXPORT KFManTargets
         LIBRARY DESTINATION lib

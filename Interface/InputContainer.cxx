@@ -29,7 +29,8 @@ void InputContainer::AddTrack(const std::vector<float>& par,
     return;
 
   if( par.size() != kNumberOfTrackPars || cov.size() != NumberOfCovElements || field.size() !=  kNumberOfFieldPars){
-    throw std::runtime_error("Wrong size of input vector!");
+//     throw std::runtime_error("Wrong size of input vector!");
+    std::cout << "Wrong size of input vector!\n";
   }
 
   KFParticle particle;

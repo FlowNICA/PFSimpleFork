@@ -48,6 +48,8 @@ void ConverterOut::Exec()
     lambdarec->SetField( candidate.GetChi2Topo(), chi2topo_field_id_);
     lambdarec->SetField( candidate.GetNHitsPos(), nhits_pos_field_id_);
     lambdarec->SetField( candidate.GetNHitsNeg(), nhits_neg_field_id_);
+    lambdarec->SetField( candidate.GetChi2GeoFull(), chi2geo_full_field_id_);
+    lambdarec->SetField( candidate.GetNDF(), ndf_field_id_);
   }
   MatchWithMc();
   out_tree_->Fill();
@@ -81,7 +83,9 @@ void ConverterOut::Init(std::map<std::string, void*>& branches)
   LambdaRecoBranch.AddField<float>("chi2topo");
   LambdaRecoBranch.AddField<int>  ("nhitspos");
   LambdaRecoBranch.AddField<int>  ("nhitsneg");
-
+  LambdaRecoBranch.AddField<float>("chi2geofull");
+  LambdaRecoBranch.AddField<int>  ("ndf");
+  
   LambdaRecoBranch.AddField<float>("x");
   LambdaRecoBranch.AddField<float>("y");
   LambdaRecoBranch.AddField<float>("z");
@@ -194,4 +198,6 @@ void ConverterOut::InitIndexes(){
   chi2topo_field_id_ = out_branch.GetFieldId("chi2topo");
   nhits_pos_field_id_ = out_branch.GetFieldId("nhitspos");
   nhits_neg_field_id_ = out_branch.GetFieldId("nhitsneg");
+  chi2geo_full_field_id_ = out_branch.GetFieldId("chi2geofull");
+  ndf_field_id_ = out_branch.GetFieldId("ndf");
 }

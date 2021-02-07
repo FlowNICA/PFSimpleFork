@@ -55,6 +55,8 @@ class SimpleFinder
   float CalculateCosMomentumSum(const std::array<float, 8> &pars1, const std::array<float, 8> &pars2) const;    ///< Calculates the cosine of the angle between daughter's and mother's momenta
   KFParticleSIMD ConstructMother(const KFPTrack &track1, int pid1, const KFPTrack &track2, int pid2) const;   ///< Creates mother particle as the KFParticleSIMD object
   float CalculateChi2Geo(const KFParticleSIMD& mother) const;  ///< Calculates \f$\chi^2\f$ of daughters' tracks in their closest approach
+  float CalculateChi2GeoFull(const KFParticleSIMD& mother) const;
+  int   CalculateNDF(const KFParticleSIMD& mother) const;  
   void  CalculateMotherProperties(const KFParticleSIMD& mother, float &l, float &ldl, int &isFromPV) const;
   ///< Calculates distance between primary and secondary vertices with error and determines whether mother comes from the PV
   

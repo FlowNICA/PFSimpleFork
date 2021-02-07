@@ -153,7 +153,10 @@ KFParticleSIMD SimpleFinder::ConstructMother(const KFPTrack &track1, const int p
   const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
   
   KFParticleSIMD mother;
+//   std::cout << "1-st daughter NDF = " << particleSIMD1.NDF()[0] << "\n";
+//   std::cout << "2-nd daughter NDF = " << particleSIMD2.NDF()[0] << "\n";
   mother.Construct(vDaughtersPointer, 2, nullptr);
+//   std::cout << "mother NDF = " << mother.NDF()[0] << "\n\n\n";
   
   return mother;
 }
@@ -163,6 +166,18 @@ float SimpleFinder::CalculateChi2Geo(const KFParticleSIMD& mother) const
  float_v chi2 = mother.Chi2()/simd_cast<float_v>(mother.NDF());
  return chi2[0];
 }
+
+float SimpleFinder::CalculateChi2GeoFull(const KFParticleSIMD& mother) const
+{
+ float_v chi2 = mother.Chi2();
+ return chi2[0];
+}
+
+int SimpleFinder::CalculateNDF(const KFParticleSIMD& mother) const
+{
+ return mother.NDF()[0];
+}
+
 
 void SimpleFinder::CalculateMotherProperties(const KFParticleSIMD& mother, float &l, float &ldl, int &isFromPV) const
 {
@@ -277,6 +292,9 @@ void SimpleFinder::FindParticles()
       lambda.SetChi2Geo(CalculateChi2Geo(mother));
       if(!finite(lambda.GetChi2Geo()) || lambda.GetChi2Geo() < 0.) continue;
       if((cuts_.GetIsApplyCutChi2Geo())&&(lambda.GetChi2Geo() >= cuts_.GetCutChi2Geo())) continue;
+      
+      lambda.SetChi2GeoFull(CalculateChi2GeoFull(mother));
+      lambda.SetNDF(CalculateNDF(mother));
       
       float l, ldl;
       int isfrompv = -1;

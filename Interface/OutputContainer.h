@@ -38,6 +38,8 @@ class OutputContainer
   void SetChi2Topo(float value) {chi2_topo_ = value;};
   void SetNHitsPos(int value) {nhits_pos_ = value;};
   void SetNHitsNeg(int value) {nhits_neg_ = value;};
+  void SetChi2GeoFull(float value) {chi2_geo_full_ = value;};
+  void SetNDF(int value) {ndf_ = value;};
   
   void SetParticle(const KFParticle& particle) {particle_ = particle;};
   
@@ -56,6 +58,8 @@ class OutputContainer
   float GetChi2Topo() const {return chi2_topo_;};
   int   GetNHitsPos() const {return nhits_pos_;};
   int   GetNHitsNeg() const {return nhits_neg_;};
+  float GetChi2GeoFull() const {return chi2_geo_full_;};
+  int   GetNDF() const {return ndf_;};
            
   const KFParticle& GetParticle() const {return particle_;};
 
@@ -76,6 +80,8 @@ class OutputContainer
   float chi2_topo_ {-1.};           ///< \f$\chi^2\f$ of the mother's track to the PV
   int   nhits_pos_{-1};
   int   nhits_neg_{-1};
+  float chi2_geo_full_{-1.};
+  int   ndf_{-1};
 
   KFParticle particle_;
   

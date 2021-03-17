@@ -72,7 +72,9 @@ class ConverterIn : public AnalysisTree::FillTask {
   int sim_pdg_field_id_{AnalysisTree::UndefValueInt};
   int passcuts_field_id_{AnalysisTree::UndefValueInt};
   int nhits_field_id_{AnalysisTree::UndefValueInt};
-
+  int chi2_field_id_{AnalysisTree::UndefValueInt};
+  int ndf_field_id_{AnalysisTree::UndefValueInt};
+  
   bool is_shine_{false};
 
 };

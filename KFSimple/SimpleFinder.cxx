@@ -27,6 +27,8 @@ void SimpleFinder::Init(const InputContainer& input)
     track_tmp.SetQ(tracks[iTr].GetQ(), iTr);
     track_tmp.SetPVIndex(-1, iTr);
     track_tmp.SetId(tracks[iTr].Id(), iTr);
+    track_tmp.SetNDF(tracks[iTr].NDF(), iTr);
+    track_tmp.SetChi2(tracks[iTr].Chi2(), iTr);
   }
 
   Init(track_tmp, input.GetVertex());
@@ -141,6 +143,10 @@ KFParticleSIMD SimpleFinder::ConstructMother(const KFPTrack &track1, const int p
   KFParticle particle2(track2, pid2);
   particle1.SetId(track1.Id());
   particle2.SetId(track2.Id());
+//   std::cout << "1-st daughter Chi2 = " << particle1.Chi2() << "\n";
+//   std::cout << "2-nd daughter Chi2 = " << particle2.Chi2() << "\n";
+//   std::cout << "1-st daughter NDF = " << particle1.NDF() << "\n";
+//   std::cout << "2-nd daughter NDF = " << particle2.NDF() << "\n";
   KFParticleSIMD particleSIMD1(particle1);    // the same particle is copied to each SIMD element
   KFParticleSIMD particleSIMD2(particle2);
   
@@ -153,9 +159,12 @@ KFParticleSIMD SimpleFinder::ConstructMother(const KFPTrack &track1, const int p
   const KFParticleSIMD* vDaughtersPointer[2] = {&particleSIMD1, &particleSIMD2};
   
   KFParticleSIMD mother;
-//   std::cout << "1-st daughter NDF = " << particleSIMD1.NDF()[0] << "\n";
-//   std::cout << "2-nd daughter NDF = " << particleSIMD2.NDF()[0] << "\n";
+//   std::cout << "1-st daughter_simd Chi2 = " << particleSIMD1.Chi2()[0] << "\n";
+//   std::cout << "2-nd daughter_simd Chi2 = " << particleSIMD2.Chi2()[0] << "\n";
+//   std::cout << "1-st daughter_simd NDF = " << particleSIMD1.NDF()[0] << "\n";
+//   std::cout << "2-nd daughter_simd NDF = " << particleSIMD2.NDF()[0] << "\n";
   mother.Construct(vDaughtersPointer, 2, nullptr);
+//   std::cout << "mother Chi2 = " << mother.Chi2()[0] << "\n";
 //   std::cout << "mother NDF = " << mother.NDF()[0] << "\n\n\n";
   
   return mother;
@@ -262,8 +271,13 @@ void SimpleFinder::FindParticles()
       KFPTrack trackNeg;
       tracks_.GetTrack(trackNeg, trIndex_[kSecNeg][iSecNeg]);
       const int pidNeg = tracks_.PDG()[trIndex_[kSecNeg][iSecNeg]];
-            
+      
       if(!(pidPos==pdg_proton && pidNeg==pdg_pionMinus)) continue;
+      
+//       std::cout << "1-st track_vector Chi2 = " << tracks_.Chi2()[trIndex_[kSecNeg][iSecNeg]] << "\n";
+//       std::cout << "2-nd track_vector Chi2 = " << tracks_.Chi2()[trIndex_[kSecPos][iSecPos]] << "\n";
+//       std::cout << "1-st track_vector NDF = " << tracks_.NDF()[trIndex_[kSecNeg][iSecNeg]] << "\n";
+//       std::cout << "2-nd track_vector NDF = " << tracks_.NDF()[trIndex_[kSecPos][iSecPos]] << "\n";
       
       OutputContainer lambda;
       
@@ -286,8 +300,14 @@ void SimpleFinder::FindParticles()
       lambda.SetCosineDaughterNeg(CalculateCosMomentumSum(pars1, pars2));
       if(((cuts_.GetIsApplyCutCosineDaughterPos())&&(lambda.GetCosineDaughterPos() < cuts_.GetCutCosineDaughterPos())) || ((cuts_.GetIsApplyCutCosineDaughterNeg())&&(lambda.GetCosineDaughterNeg() < cuts_.GetCutCosineDaughterNeg()))
          || lambda.GetCosineDaughterPos()!=lambda.GetCosineDaughterPos() || lambda.GetCosineDaughterNeg()!=lambda.GetCosineDaughterNeg()) continue;
-            
+      
+//       std::cout << "1-st track Chi2 = " << trackNeg.GetChi2() << "\n";
+//       std::cout << "2-nd track Chi2 = " << trackPos.GetChi2() << "\n";
+//       std::cout << "1-st track NDF = " << trackNeg.GetNDF() << "\n";
+//       std::cout << "2-nd track NDF = " << trackPos.GetNDF() << "\n\n";
       KFParticleSIMD mother = ConstructMother(trackNeg, pidNeg, trackPos, pidPos);
+//       std::cout << "Mother's Chi2 = " << CalculateChi2GeoFull(mother) << "\n";
+//       std::cout << "Mother's NDF = " << CalculateNDF(mother) << "\n\n\n\n";
       
       lambda.SetChi2Geo(CalculateChi2Geo(mother));
       if(!finite(lambda.GetChi2Geo()) || lambda.GetChi2Geo() < 0.) continue;

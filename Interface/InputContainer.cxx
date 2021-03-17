@@ -22,6 +22,8 @@ void InputContainer::AddTrack(const std::vector<float>& par,
                               const std::vector<float>& field,
                               int charge,
                               int pdg,
+                              float chi2,
+                              int ndf,
                               int id,
                               int nhits)
 {
@@ -49,6 +51,8 @@ void InputContainer::AddTrack(const std::vector<float>& par,
 
   particle.Q() = char(charge);  //NOTE: is not safe
   particle.SetPDG(pdg);
+  particle.Chi2() = chi2;
+  particle.NDF() = ndf;
   particle.SetId(id);
 
   tracks_.push_back(particle);

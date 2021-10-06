@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 //   //****************************************
 
   // ******** default kfpf cuts *************
-  Daughter proton(2212);
+  Daughter proton(2212, {2212, 211, 1000010020});
   Daughter pion(-211);
 
   proton.SetCutChi2Prim(18.42);

@@ -25,12 +25,12 @@ add_target_property(KFMan COMPILE_FLAGS "-DDO_TPCCATRACKER_EFF_PERFORMANCE -DNon
 add_executable(main2 main2.cpp)
 add_dependencies(main2 KFMan)
 add_target_property(main2 COMPILE_FLAGS "-DDO_TPCCATRACKER_EFF_PERFORMANCE -DNonhomogeneousField -DCBM -DUSE_TIMERS")
-target_link_libraries(main2 KFMan KFParticleSimple KFParticleInterface KFParticle Vc)
+target_link_libraries(main2 KFMan KFParticleSimple KFParticleInterface KFParticle)
 
 add_executable(main3 main3.cpp)
 add_dependencies(main3 KFMan)
 add_target_property(main3 COMPILE_FLAGS "-DDO_TPCCATRACKER_EFF_PERFORMANCE -DNonhomogeneousField -DCBM -DUSE_TIMERS")
-target_link_libraries(main3 KFMan KFParticleSimple KFParticleInterface KFParticle Vc)
+target_link_libraries(main3 KFMan KFParticleSimple KFParticleInterface KFParticle)
 
 install(TARGETS KFMan EXPORT KFManTargets
         LIBRARY DESTINATION lib

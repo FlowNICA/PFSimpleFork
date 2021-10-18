@@ -2,6 +2,7 @@
 #define KFPARTICLESIMPLE_KFSIMPLE_DAUGHTERCUTS_HPP_
 
 #include <vector>
+#include <math.h> 
 
 #include "Constants.hpp"
 
@@ -25,20 +26,25 @@ class Daughter {
   float GetCutChi2Prim() const { return chi2_prim_; }
   float GetCutCos() const { return cos_; }
   int GetId() const { return id_; }
+  int GetQ() const { return (int)copysign(1,pdg_hypo_); }
+  float GetPidPurity() const {return pid_purity_;}
 
   void SetCutChi2Prim(float value) { chi2_prim_ = value; }
   void SetCutCos(float value) { cos_ = value; }
   void CancelCutChi2Prim() { this->SetCutChi2Prim(-huge_value); }
   void CancelCutCos() { this->SetCutCos(-huge_value); }
   void SetId(int id) { id_ = id; }
+  void SetPidPurity(float pid_purity)  { pid_purity_ = pid_purity; }
   void CancelCuts();
 
  protected:
   Pdg_t pdg_hypo_{-1};       ///< PDG code hypothesis
+  int charge_{0};            ///< charge
   std::vector<Pdg_t> pids_{};///< vector of PDG codes to use
   float chi2_prim_{18.4207}; ///< \f$\chi^2\f$ lower value
   float cos_{0.f};           ///< cosine lower value
   int id_{-1};               ///< daughther number (0, 1, 2)
+  float pid_purity_{0.5};    ///< minimum requested purity for reconstructed daughter track
 };
 
 #endif//KFPARTICLESIMPLE_KFSIMPLE_DAUGHTERCUTS_HPP_

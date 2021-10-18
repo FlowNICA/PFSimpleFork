@@ -40,30 +40,41 @@ class SimpleFinderNew {
   SimpleFinderNew& operator=(const SimpleFinderNew&) = default;
   ~SimpleFinderNew() = default;
 
-  void Init(std::vector<KFParticle>&& tracks, const KFVertex& pv);///< Initialize SimpleFinder object with PV and set of tracks of the current event
+  void Init(std::vector<KFParticle>&& tracks, const KFVertex& pv, std::vector<std::vector<float>> tracks_pdg_prob);///< Initialize SimpleFinder object with PV, set of tracks of the current event and with pdg probabilties for reconstructed tracks
   void Init(const InputContainer& input);
 
   void InitIndexesMap();
+  void InitIndexesMap(const Decay& decay, const int iIndexesMap);
 
   void FindParticles() {
+    int iIndexesMap = 0;
     for (const auto& decay : decays_) {
-      ReconstructDecay(decay);
+      ReconstructDecay(decay, iIndexesMap);
+      if (pid_mode_ == 2) iIndexesMap ++;
     }
   }
 
-  void ReconstructDecay(const Decay& decay);
+  void ReconstructDecay(const Decay& decay, const int iIndexesMap);
   void SetDecays(const std::vector<Decay>& decays) { decays_ = decays; }
   void AddDecay(const Decay& decay) { decays_.emplace_back(decay); }
+  void SetPidMode(const int pid_mode) { pid_mode_ = pid_mode; }
+  void SetPidPurity(const float pid_purity) { pid_purity_ = pid_purity; }
   const std::vector<OutputContainer>& GetCandidates() const { return output_; }
 
  private:
-  std::vector<KFParticle> tracks_;    ///< input information: vector of tracks
-  KFVertex prim_vx_;                  ///< input information: primiry vertex
-  std::array<float, 3> sec_vx_;       ///< input information: primiry vertex
-  std::vector<Decay> decays_{};       ///< input information: list of decays to reconstruct
-  NonLinearCutBase* ml_cuts_{nullptr};///< input information: non-linear cuts class (optional)
+  std::vector<KFParticle> tracks_;                   ///< input information: vector of tracks
+  std::vector<std::vector<float>> tracks_pdg_prob_{};///< input information: pdg probabilities of tracks
+  KFVertex prim_vx_;                                 ///< input information: primary vertex
+  std::array<float, 3> sec_vx_;                      ///< input information: sedondary vertex
+  std::vector<Decay> decays_{};                      ///< input information: list of decays to reconstruct
+  NonLinearCutBase* ml_cuts_{nullptr};               ///< input information: non-linear cuts class (optional)
+  int pid_mode_{0};                                  ///< input information: selection mode for pid:
+                                                     ///< 0 = mc pid 
+                                                     ///< 1 = rec pid with max. purity & purity > min. requested purity for all daughters;
+				                     ///< 2 = rec pid with purity > min. requested purity, purity set for every daughter pdg (in case of purity for 2 daughter pdgs > min. purity, pid with higher prob is choosen)
+  float pid_purity_{0.5};                            ///< min. requested purity for all daughters used in mode 1
 
-  std::map<Pdg_t, std::vector<int>> indexes_{};///< map of indexes for a given particle specie
+  std::vector<std::map<Pdg_t, std::vector<int>>> indexes_{};///< map of indexes for a given particle specie
 
   Parameters_t params_{};   ///< vector of daughter parameters at current SV estimation
   SelectionValues values_{};///< struct with mother and daughters properties used to apply cuts
@@ -75,7 +86,7 @@ class SimpleFinderNew {
   * @param cuts daughter particle cuts container
   * @return vector of indexes
   */
-  std::vector<int> GetIndexes(const Daughter& cuts);
+  std::vector<int> GetIndexes(const Daughter& cuts, const int iIndexesMap);
 
   bool IsGoodDaughter(const KFParticle& track, const Daughter& cuts);
   bool IsGoodPair(const KFParticle& track1, const KFParticle& track2, const Decay& decay);

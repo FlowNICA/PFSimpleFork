@@ -42,20 +42,19 @@ class InputContainer {
   void SetPV(float x, float y, float z);
   void SetPV(KFVertex vertex);
   void SetPV(KFPVertex vertex);
-  void AddTrack(const std::vector<float>& par, const std::vector<float>& cov, const std::vector<float>& field, int charge, int pdg, int id, int nhits);
+  void AddTrack(const std::vector<float>& par, const std::vector<float>& cov, const std::vector<float>& field, int charge, int pdg, int id, int nhits, const std::vector<float> pdg_prob);
   //   KFParticleTopoReconstructor* CreateTopoReconstructor();                                                                                                   //^ not good
-
-  //  void SetCuts(const CutsContainer& cuts) { cuts_ = cuts; };
-  //  void SetDecay(const DecayContainer& decay) { decay_ = decay; };
 
   const KFVertex& GetVertex() const { return vtx_; };
   const std::vector<KFParticle>& GetTracks() const { return tracks_; };
-  //  const CutsContainer& GetCuts() const { return cuts_; };
-  //  const DecayContainer& GetDecay() const { return decay_; };
+  const std::vector<std::vector<float>> GetPdgProb() const { return tracks_pdg_prob_; };
 
   void Clear() {
     if (!tracks_.empty()) {
       tracks_.clear();
+    }
+    if (!tracks_pdg_prob_.empty()) {
+      tracks_pdg_prob_.clear();
     }
   }
 
@@ -66,8 +65,8 @@ class InputContainer {
 
   KFVertex vtx_;
   std::vector<KFParticle> tracks_{};
-  //  CutsContainer cuts_;
-  //  DecayContainer decay_;
+  std::vector<std::vector<float>> tracks_pdg_prob_{};
+
 };
 
 #endif//InputContainer_H

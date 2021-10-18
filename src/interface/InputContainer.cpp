@@ -21,7 +21,8 @@ void InputContainer::AddTrack(const std::vector<float>& par,
                               int charge,
                               int pdg,
                               int id,
-                              int nhits) {
+                              int nhits,
+			      const std::vector<float> pdg_prob) {
   if (pdg == 0 || pdg == -2)
     return;
 
@@ -48,6 +49,7 @@ void InputContainer::AddTrack(const std::vector<float>& par,
   particle.SetId(id);
 
   tracks_.push_back(particle);
+  tracks_pdg_prob_.push_back(pdg_prob);
 }
 
 double InputContainer::InversedChi2Prob(double p, int ndf) {
@@ -77,6 +79,7 @@ double InputContainer::InversedChi2Prob(double p, int ndf) {
 
 void InputContainer::Reserve(size_t n) {
   tracks_.reserve(n);
+  tracks_pdg_prob_.reserve(n);
 }
 
 // KFParticleTopoReconstructor* InputContainer::CreateTopoReconstructor()

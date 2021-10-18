@@ -34,6 +34,7 @@ class ConverterIn : public AnalysisTree::Task {
   void SetIsShine(bool is = true) { is_shine_ = is; }
   void SetTrackCuts(AnalysisTree::Cuts* const cuts) { track_cuts_ = cuts; };
   void SetMotherPdgsToBeConsidered(std::vector<int>&& pdgs){ mother_pdgs_to_be_considered_ = pdgs; };
+  void SetPidMode(const int pid_mode) { pid_mode_ = pid_mode; }
 
  protected:
   std::vector<float> GetCovMatrixCbm(const AnalysisTree::Track&) const;
@@ -67,7 +68,9 @@ class ConverterIn : public AnalysisTree::Task {
   int sim_pdg_field_id_{AnalysisTree::UndefValueInt};
   int passcuts_field_id_{AnalysisTree::UndefValueInt};
   int nhits_field_id_{AnalysisTree::UndefValueInt};
-
+  int prob_field_id_{AnalysisTree::UndefValueInt};                                                                                                                    
+  int pdg_field_id_rec_{AnalysisTree::UndefValueInt}; 
+  int pid_mode_{0};
   bool is_shine_{false};
 };
 

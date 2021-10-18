@@ -11,13 +11,13 @@
 using namespace AnalysisTree;
 
 void ConverterIn::FillParticle(const AnalysisTree::Track& rec_particle) {
+
   std::vector<float> mf(NumberOfFieldPars, 0.f);
   for (int iF = 0; iF < NumberOfFieldPars; iF++) {
     mf[iF] = rec_particle.GetField<float>(mf_field_id_ + iF);
   }
   auto cov_matrix = is_shine_ ? GetCovMatrixShine(rec_particle) : GetCovMatrixCbm(rec_particle);
   std::vector<float> par(kNumberOfTrackPars, 0.f);
-
   par[kX] = rec_particle.GetField<float>(par_field_id_);
   par[kY] = rec_particle.GetField<float>(par_field_id_ + 1);
   par[kZ] = rec_particle.GetField<float>(par_field_id_ + 2);
@@ -25,22 +25,42 @@ void ConverterIn::FillParticle(const AnalysisTree::Track& rec_particle) {
   par[kPy] = rec_particle.GetPy();
   par[kPz] = rec_particle.GetPz();
 
-  const int pdg = rec_particle.GetField<int>(pdg_field_id_);//TODO
-                                                            //  const int pdg = rec_particle.GetPid();
+  const int q = rec_particle.GetField<int>(q_field_id_);
+
+  std::vector<float> pdg_prob;
+
+  if (pid_mode_ == 0) {
+    const int pdg = rec_particle.GetField<int>(pdg_field_id_);//TODO
+  //  const int pdg = rec_particle.GetPid();
+    
+    container_.AddTrack(par, cov_matrix, mf, q, pdg, rec_particle.GetId(), rec_particle.GetField<int>(nhits_field_id_), pdg_prob);
+  }
   
-  container_.AddTrack(par, cov_matrix, mf, rec_particle.GetField<int>(q_field_id_), pdg, rec_particle.GetId(), rec_particle.GetField<int>(nhits_field_id_));
+  else {
+    if (rec_particle.GetField<float>(prob_field_id_) == -1) // needs to be done to exclude tracks with no TOF id (tracks with no TOF id have the same pid than negative background)
+      return;
+    const int pdg = rec_particle.GetField<int>(pdg_field_id_rec_)*q;
+    for(size_t i=0; i<pid_codes_rec.size(); ++i)
+      pdg_prob.push_back(rec_particle.GetField<float>(prob_field_id_ + i));
+
+    container_.AddTrack(par, cov_matrix, mf, q, pdg, rec_particle.GetId(), rec_particle.GetField<int>(nhits_field_id_), pdg_prob);
+  }
 }
 
 void ConverterIn::Init() {
   auto* chain = AnalysisTree::TaskManager::GetInstance()->GetChain();
 
+  if (pid_mode_ != 0) kf_tracks_name_ = "RecTracks";
+    
   rec_event_header_ = ANALYSISTREE_UTILS_GET<AnalysisTree::EventHeader*>(chain->GetPointerToBranch(rec_event_header_name_));
   sim_event_header_ = ANALYSISTREE_UTILS_GET<AnalysisTree::EventHeader*>(chain->GetPointerToBranch(sim_event_header_name_));
+
   kf_tracks_ = ANALYSISTREE_UTILS_GET<AnalysisTree::TrackDetector*>(chain->GetPointerToBranch(kf_tracks_name_));
   sim_tracks_ = ANALYSISTREE_UTILS_GET<AnalysisTree::Particles*>(chain->GetPointerToBranch(sim_tracks_name_));
   kf2sim_tracks_ = chain->GetMatchPointers().find(config_->GetMatchName(kf_tracks_name_, sim_tracks_name_))->second;
-
+  
   const auto& branch_conf_kftr = config_->GetBranchConfig(kf_tracks_name_);
+
   q_field_id_ = branch_conf_kftr.GetFieldId("q");
   par_field_id_ = branch_conf_kftr.GetFieldId("x");   // par0
   mf_field_id_ = branch_conf_kftr.GetFieldId("cx0");  // magnetic field par0
@@ -48,11 +68,16 @@ void ConverterIn::Init() {
   passcuts_field_id_ = branch_conf_kftr.GetFieldId("pass_cuts");
   pdg_field_id_ = branch_conf_kftr.GetFieldId("mc_pdg");
   nhits_field_id_ = branch_conf_kftr.GetFieldId("nhits");
+  
+  if (pid_mode_ != 0) {
+    prob_field_id_ = branch_conf_kftr.GetFieldId("prob_p");
+    pdg_field_id_rec_ = branch_conf_kftr.GetFieldId("rec_pdg");
+  }
 
   const auto& branch_conf_simtr = config_->GetBranchConfig(sim_tracks_name_);
   mother_id_field_id_ = branch_conf_simtr.GetFieldId("mother_id");
   sim_pdg_field_id_ = branch_conf_simtr.GetFieldId("pdg");
-
+    
   if (track_cuts_) {
     track_cuts_->Init(*config_);
   }

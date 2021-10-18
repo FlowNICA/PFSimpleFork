@@ -80,6 +80,8 @@ void ConverterOutTree::Exec() {
 
 void ConverterOutTree::Init() {
 
+  if (pid_mode_ != 0) rec_tracks_name_ = "RecTracks";
+
   auto* man = AnalysisTree::TaskManager::GetInstance();
   auto* chain = man->GetChain();
 

@@ -38,4 +38,7 @@ constexpr float huge_value = std::numeric_limits<float>::max();
 constexpr int NumberOfCovElements = 21;
 constexpr int NumberOfFieldPars = 10;
 
+constexpr std::array<int, 5> pid_codes_rec = { 
+	     2212, 211, 321, 1000010020, 1
+};
 #endif// Constants_H

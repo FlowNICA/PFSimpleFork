@@ -24,6 +24,7 @@ class ConverterOut : public AnalysisTree::Task {
 
   void CopyParticle(const OutputContainer& kf_particle, AnalysisTree::Particle& particle) const;
   void SetDecay(const Decay& decay) { decay_ = decay; }
+  void SetPidMode(const int pid_mode) { pid_mode_ = pid_mode; }
   void SetOutputCuts(AnalysisTree::Cuts* output_cuts) { output_cuts_ = output_cuts; }
 
  protected:
@@ -75,6 +76,8 @@ class ConverterOut : public AnalysisTree::Task {
   int chi2geo_sm_field_id_{-1};
   int chi2topo_sm_field_id_{-1};
   int cosine_topo_sm_field_id_{-1};
+  
+  int pid_mode_{0};
 };
 
 #endif//KFPARTICLESIMPLE_ANALYSISTREEINTERFACE_CONVERTEROUT_H_

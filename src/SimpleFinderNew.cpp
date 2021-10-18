@@ -1,15 +1,23 @@
 #include "SimpleFinderNew.hpp"
 #include <KFParticleSIMD.h>
 
-void SimpleFinderNew::Init(std::vector<KFParticle>&& tracks, const KFVertex& pv) {
+void SimpleFinderNew::Init(std::vector<KFParticle>&& tracks, const KFVertex& pv, std::vector<std::vector<float>> tracks_pdg_prob) {
   tracks_ = tracks;
+  tracks_pdg_prob_ = tracks_pdg_prob;
   prim_vx_ = pv;
-  InitIndexesMap();
+  if (pid_mode_ < 2) InitIndexesMap();
+  else {
+    int iIndexesMap = 0;
+    for (const auto& decay : decays_) {
+      InitIndexesMap(decay, iIndexesMap);
+      iIndexesMap ++;
+    }
+  }
 }
 
 void SimpleFinderNew::Init(const InputContainer& input) {// TODO know how to de-const without time lose for copying by value
   std::vector<KFParticle> tracks = input.GetTracks();
-  Init(std::move(tracks), input.GetVertex());
+  Init(std::move(tracks), input.GetVertex(), input.GetPdgProb());
 }
 
 float SimpleFinderNew::CalculateDistanceBetweenParticles(const Parameters_t& parameters) {
@@ -126,11 +134,11 @@ float SimpleFinderNew::CalculateChiToPrimaryVertex(const KFParticle& track, Pdg_
   return chi2vec[0];
 }
 
-std::vector<int> SimpleFinderNew::GetIndexes(const Daughter& daughter) {
+std::vector<int> SimpleFinderNew::GetIndexes(const Daughter& daughter, const int iIndexesMap) {
   std::vector<int> result{};
   for (auto pid : daughter.GetPids()) {
-    auto it = indexes_.find(pid);
-    if (it != indexes_.end()) {
+    auto it = indexes_[iIndexesMap].find(pid);
+    if (it != indexes_[iIndexesMap].end()) {
       for (auto i_track : it->second) {
         auto track = GetTrack(i_track);
         if (IsGoodDaughter(track, daughter)) {
@@ -144,12 +152,54 @@ std::vector<int> SimpleFinderNew::GetIndexes(const Daughter& daughter) {
 
 void SimpleFinderNew::InitIndexesMap() {
   for (int i = 0; i < tracks_.size(); i++) {
-    auto pdg = tracks_.at(i).GetPDG();
-    auto it = indexes_.find(pdg);
-    if (it != indexes_.end()) {
+    int pdg;    
+    if (pid_mode_ == 0 || pid_purity_ == 0.5) {
+      pdg = tracks_.at(i).GetPDG();
+    } else { 
+      std::vector<float> prob;       
+      for(size_t ipid=0; ipid<pid_codes_rec.size(); ++ipid)
+	prob.push_back(tracks_pdg_prob_.at(i).at(ipid));
+      
+      if (*std::max_element(prob.begin(), prob.end()) < pid_purity_)
+	continue;     
+      auto it_prob = find(prob.begin(), prob.end(), *std::max_element(prob.begin(), prob.end()));
+      int index = std::distance(prob.begin(),it_prob);     
+      pdg = pid_codes_rec[index]*tracks_.at(i).GetQ();
+    }
+    indexes_.resize(1);
+    auto it = indexes_[0].find(pdg);
+    if (it != indexes_[0].end()) {
       it->second.emplace_back(i);
     } else {
-      indexes_[pdg] = {i};
+      indexes_[0][pdg] = {i};
+    }
+  }
+}
+
+void SimpleFinderNew::InitIndexesMap(const Decay& decay, const int iIndexesMap) {
+  for (int i = 0; i < tracks_.size(); i++) {
+    int pdg;      
+    std::vector<float> prob;
+    for(size_t ipid=0; ipid<pid_codes_rec.size(); ipid++)
+      prob.push_back(tracks_pdg_prob_.at(i).at(ipid));
+  
+    std::map<int, float> map_pid_prob;
+    for(size_t ipid=0; ipid<pid_codes_rec.size(); ipid++) 
+      for (const auto& daughter : decay.GetDaughters()) {
+	if (daughter.GetQ() != tracks_.at(i).GetQ()) continue;
+	if (prob[ipid] < daughter.GetPidPurity()) continue;	  
+	for (auto pid : daughter.GetPids())
+	  if(pid_codes_rec[ipid]*tracks_.at(i).GetQ() == pid) 
+	    map_pid_prob[pid] = prob[ipid];
+      }
+    auto it_prob = std::max_element(map_pid_prob.begin(),map_pid_prob.end(),[] (const std::pair<int,float>& a, const std::pair<int,float>& b)->bool{ return a.second < b.second; } );
+    pdg = it_prob->first;
+    indexes_.resize(iIndexesMap+1);
+    auto it = indexes_[iIndexesMap].find(pdg);
+    if (it != indexes_[iIndexesMap].end()) {
+      it->second.emplace_back(i);
+    } else {
+      indexes_[iIndexesMap][pdg] = {i};
     }
   }
 }
@@ -314,12 +364,12 @@ void SimpleFinderNew::CalculateSecondaryVertex() {
     sec_vx_.at(i) = (params_[0].at(kX + i) + params_[1].at(kX + i)) / 2;
 }
 
-void SimpleFinderNew::ReconstructDecay(const Decay& decay) {
+void SimpleFinderNew::ReconstructDecay(const Decay& decay, const int iIndexesMap) {
 
   std::vector<std::vector<int>> indexes{};
   std::vector<Pdg_t> pdgs{};
   for (const auto& daughter : decay.GetDaughters()) {
-    indexes.emplace_back(GetIndexes(daughter));
+    indexes.emplace_back(GetIndexes(daughter, iIndexesMap));
     pdgs.emplace_back(daughter.GetPdgHypo());
   }
 

@@ -23,6 +23,7 @@ class ConverterOutTree : public AnalysisTree::Task {
   void SetOutFilename(const std::string out_file_name) { out_file_name_ = out_file_name; }
   void CopyParticle(const OutputContainer& kf_particle);
   void SetDecay(const Decay& decay) { decay_ = decay; }
+  void SetPidMode(const int pid_mode) { pid_mode_ = pid_mode; }
 
  protected:
   void MatchWithMc();
@@ -76,7 +77,7 @@ class ConverterOutTree : public AnalysisTree::Task {
   float distance_{-1.f}, distance_sv_{-1.f};
   float chi2geo_sm_1_{-1.f}, chi2geo_sm_2_{-1.f}, chi2geo_sm_3_{-1.f};
   float chi2topo_sm_1_{-1.f}, chi2topo_sm_2_{-1.f}, chi2topo_sm_3_{-1.f};
-  float costopo_sm_1_{-1.f}, costopo_sm_2_{-1.f}, costopo_sm_3_{-1.f};  
+  float costopo_sm_1_{-1.f}, costopo_sm_2_{-1.f}, costopo_sm_3_{-1.f};
   float chi2geo_{-1.f};
   float chi2topo_{-1.f};
   float costopo_{-1.f};
@@ -87,6 +88,8 @@ class ConverterOutTree : public AnalysisTree::Task {
   int g4process_{-1};
   int is_mc_{0};  
   int id_mc_{-1};
+  
+  int pid_mode_{0};
 };
 
 #endif//KFPARTICLESIMPLE_ANALYSISTREEINTERFACE_CONVERTEROUTTREE_H_

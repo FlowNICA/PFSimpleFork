@@ -81,17 +81,17 @@ class ConverterIn : public AnalysisTree::Task {
   };
 
  protected:
-  std::vector<float> GetCovMatrixCbm(const AnalysisTree::Track&) const;
-  std::vector<float> GetCovMatrixShine(const AnalysisTree::Track&) const;
-  void FillParticle(const AnalysisTree::Track&);
-  bool IsGoodTrack(const AnalysisTree::Track& rec_track) const;
-  bool CheckMotherPdgs(const AnalysisTree::Track& rec_track) const;
+  std::vector<float> GetCovMatrixCbm(const AnalysisTree::BranchChannel&) const;
+  std::vector<float> GetCovMatrixShine(const AnalysisTree::BranchChannel&) const;
+  void FillParticle(const AnalysisTree::BranchChannel&);
+  bool IsGoodTrack(const AnalysisTree::BranchChannel& rec_track) const;
+  bool CheckMotherPdgs(const AnalysisTree::BranchChannel& rec_track) const;
 
-  AnalysisTree::TrackDetector* kf_tracks_{nullptr};
-  AnalysisTree::Particles* sim_tracks_{nullptr};
+  AnalysisTree::Branch kf_tracks_;
+  AnalysisTree::Branch sim_tracks_;
   AnalysisTree::Matching* kf2sim_tracks_{nullptr};
-  AnalysisTree::EventHeader* rec_event_header_{nullptr};
-  AnalysisTree::EventHeader* sim_event_header_{nullptr};
+  AnalysisTree::Branch rec_event_header_;
+  AnalysisTree::Branch sim_event_header_;
   AnalysisTree::Cuts* track_cuts_{nullptr};
   std::vector<int> mother_pdgs_to_be_considered_;
 
@@ -103,18 +103,18 @@ class ConverterIn : public AnalysisTree::Task {
   std::string sim_tracks_name_;
 
   // field ids for input parameters
-  int q_field_id_{AnalysisTree::UndefValueInt};
-  int pdg_field_id_{AnalysisTree::UndefValueInt};
-  int par_field_id_{AnalysisTree::UndefValueInt};
-  int mf_field_id_{AnalysisTree::UndefValueInt};
-  int cov_field_id_{AnalysisTree::UndefValueInt};
-  int mother_id_field_id_{AnalysisTree::UndefValueInt};
-  int sim_pdg_field_id_{AnalysisTree::UndefValueInt};
-  int passcuts_field_id_{AnalysisTree::UndefValueInt};
-  int nhits_field_id_{AnalysisTree::UndefValueInt};
-
-  int pdg_rec_field_id_{AnalysisTree::UndefValueInt};
-  int pdg_prob_field_id_{AnalysisTree::UndefValueInt};
+// //   int q_field_id_{AnalysisTree::UndefValueInt};
+// //   int pdg_field_id_{AnalysisTree::UndefValueInt};
+// //   int par_field_id_{AnalysisTree::UndefValueInt};
+// //   int mf_field_id_{AnalysisTree::UndefValueInt};
+// //   int cov_field_id_{AnalysisTree::UndefValueInt};
+// //   int mother_id_field_id_{AnalysisTree::UndefValueInt};
+// //   int sim_pdg_field_id_{AnalysisTree::UndefValueInt};
+// //   int passcuts_field_id_{AnalysisTree::UndefValueInt};
+// //   int nhits_field_id_{AnalysisTree::UndefValueInt};
+// // 
+// //   int pdg_rec_field_id_{AnalysisTree::UndefValueInt};
+// //   int pdg_prob_field_id_{AnalysisTree::UndefValueInt};
   int pid_mode_{1};
   std::array<float, NumberOfPids> pid_purity_{0.5, 0.5, 0.5, 0.5, 0.5};
   bool is_shine_{false};

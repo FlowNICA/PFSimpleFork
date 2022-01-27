@@ -102,19 +102,41 @@ class ConverterIn : public AnalysisTree::Task {
   std::string kf_tracks_name_;
   std::string sim_tracks_name_;
 
-  // field ids for input parameters
-// //   int q_field_id_{AnalysisTree::UndefValueInt};
-// //   int pdg_field_id_{AnalysisTree::UndefValueInt};
-// //   int par_field_id_{AnalysisTree::UndefValueInt};
-// //   int mf_field_id_{AnalysisTree::UndefValueInt};
-// //   int cov_field_id_{AnalysisTree::UndefValueInt};
-// //   int mother_id_field_id_{AnalysisTree::UndefValueInt};
-// //   int sim_pdg_field_id_{AnalysisTree::UndefValueInt};
-// //   int passcuts_field_id_{AnalysisTree::UndefValueInt};
-// //   int nhits_field_id_{AnalysisTree::UndefValueInt};
-// // 
-// //   int pdg_rec_field_id_{AnalysisTree::UndefValueInt};
-// //   int pdg_prob_field_id_{AnalysisTree::UndefValueInt};
+  // fields for input parameters
+  
+  std::vector<AnalysisTree::Field> mf_field_;
+  
+  AnalysisTree::Field x_field_;
+  AnalysisTree::Field y_field_;
+  AnalysisTree::Field z_field_;
+  AnalysisTree::Field px_field_;
+  AnalysisTree::Field py_field_;
+  AnalysisTree::Field pz_field_;
+  
+  AnalysisTree::Field q_field_;
+  AnalysisTree::Field mc_pdg_field_;
+  AnalysisTree::Field nhits_field_;
+  
+  AnalysisTree::Field rec_pdg_field_;
+  AnalysisTree::Field prob_p_field_;
+  AnalysisTree::Field prob_pi_field_;
+  AnalysisTree::Field prob_K_field_;
+  AnalysisTree::Field prob_d_field_;
+  AnalysisTree::Field prob_bg_field_;
+  
+  AnalysisTree::Field vtx_x_field_;
+  AnalysisTree::Field vtx_y_field_;
+  AnalysisTree::Field vtx_z_field_;
+  
+  AnalysisTree::Field tx_field_;
+  AnalysisTree::Field ty_field_;
+  AnalysisTree::Field qp_field_;
+  
+  std::vector<AnalysisTree::Field> cov_field_;
+  
+  AnalysisTree::Field mother_id_field_;
+  AnalysisTree::Field sim_pdg_field_;
+  
   int pid_mode_{1};
   std::array<float, NumberOfPids> pid_purity_{0.5, 0.5, 0.5, 0.5, 0.5};
   bool is_shine_{false};

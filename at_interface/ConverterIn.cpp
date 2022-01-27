@@ -146,10 +146,10 @@ void ConverterIn::Exec() {
 }
 
 std::vector<float> ConverterIn::GetCovMatrixCbm(const AnalysisTree::BranchChannel& particle) const {
-  const auto tx = particle[kf_tracks_.GetField("tx")];
-  const auto ty = particle[kf_tracks_.GetField("ty")];
-  const auto qp = particle[kf_tracks_.GetField("qp")];
-  const auto q =  particle[kf_tracks_.GetField("q")];
+  const auto tx = particle[tx_field_];
+  const auto ty = particle[ty_field_];
+  const auto qp = particle[qp_field_];
+  const auto q =  particle[q_field_];
 
   //calculate covariance matrix
   const auto t = sqrt(1.f + tx * tx + ty * ty);

@@ -146,23 +146,23 @@ void ConverterIn::Exec() {
 }
 
 std::vector<float> ConverterIn::GetCovMatrixCbm(const AnalysisTree::BranchChannel& particle) const {
-  const auto tx = particle[tx_field_];
-  const auto ty = particle[ty_field_];
-  const auto qp = particle[qp_field_];
-  const auto q =  particle[q_field_];
+  const float tx = particle[tx_field_];
+  const float ty = particle[ty_field_];
+  const float qp = particle[qp_field_];
+  const float q =  particle[q_field_];
 
   //calculate covariance matrix
-  const auto t = sqrt(1.f + tx * tx + ty * ty);
-  const auto t3 = t * t * t;
-  const auto dpxdtx = q / qp * (1.f + ty * ty) / t3;
-  const auto dpxdty = -q / qp * tx * ty / t3;
-  const auto dpxdqp = -q / (qp * qp) * tx / t;
-  const auto dpydtx = -q / qp * tx * ty / t3;
-  const auto dpydty = q / qp * (1.f + tx * tx) / t3;
-  const auto dpydqp = -q / (qp * qp) * ty / t;
-  const auto dpzdtx = -q / qp * tx / t3;
-  const auto dpzdty = -q / qp * ty / t3;
-  const auto dpzdqp = -q / (qp * qp * t3);
+  const float t = sqrt(1.f + tx * tx + ty * ty);
+  const float t3 = t * t * t;
+  const float dpxdtx = q / qp * (1.f + ty * ty) / t3;
+  const float dpxdty = -q / qp * tx * ty / t3;
+  const float dpxdqp = -q / (qp * qp) * tx / t;
+  const float dpydtx = -q / qp * tx * ty / t3;
+  const float dpydty = q / qp * (1.f + tx * tx) / t3;
+  const float dpydqp = -q / (qp * qp) * ty / t;
+  const float dpzdtx = -q / qp * tx / t3;
+  const float dpzdty = -q / qp * ty / t3;
+  const float dpzdqp = -q / (qp * qp * t3);
 
   const float F[kNumberOfTrackPars][5] = {{1.f, 0.f, 0.f, 0.f, 0.f},
                                           {0.f, 1.f, 0.f, 0.f, 0.f},
